@@ -1,3 +1,1 @@
-import { Regon } from './Regon';
-
-export = Regon;
+export * from './Regon';

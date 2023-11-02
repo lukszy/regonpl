@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-      "outDir": "./dist",
-      "noImplicitAny": true,
-      "target": "ES5",
-      "declaration": true
+    "outDir": "./dist",
+    "target": "ESNext",
+    "declaration": true,
+    "strict": true
   },
-  "include": [
-      "./src/**/*"
-  ]
+  "include": ["./src/**/*"]
 }

@@ -1,6 +1,6 @@
-import { ParametryWyszukiwania } from './interfaces';
+import { SearchParameters } from './interfaces';
 
-export const envelopeZaloguj = (key: string): string => `
+export const loginTemplate = (key: string): string => `
 <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://CIS/BIR/PUBL/2014/07">
     <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
         <wsa:To>https://wyszukiwarkaregon.stat.gov.pl/wsBIR/UslugaBIRzewnPubl.svc</wsa:To>
@@ -14,7 +14,7 @@ export const envelopeZaloguj = (key: string): string => `
 </soap:Envelope>
 `;
 
-export const envelopeWyloguj = (sid: string): string => `
+export const logoutTemplate = (sid: string): string => `
 <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://CIS/BIR/PUBL/2014/07">
     <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
         <wsa:To>https://wyszukiwarkaregon.stat.gov.pl/wsBIR/UslugaBIRzewnPubl.svc</wsa:To>
@@ -28,7 +28,18 @@ export const envelopeWyloguj = (sid: string): string => `
 </soap:Envelope>
 `;
 
-export const envelopeDaneSzukajPodmioty = (params: ParametryWyszukiwania): string => `
+export const findCompanyTemplate = (params: SearchParameters): string => {
+  let regonType = 'standard';
+
+  if (params.REGON?.length === 9) {
+    regonType = 'size9';
+  }
+
+  if (params.REGON?.length === 14) {
+    regonType = 'size14';
+  }
+
+  return `
 <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://CIS/BIR/PUBL/2014/07" xmlns:dat="http://CIS/BIR/PUBL/2014/07/DataContract">
     <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
         <wsa:To>https://wyszukiwarkaregon.stat.gov.pl/wsBIR/UslugaBIRzewnPubl.svc</wsa:To>
@@ -37,15 +48,32 @@ export const envelopeDaneSzukajPodmioty = (params: ParametryWyszukiwania): strin
     <soap:Body>
         <ns:DaneSzukajPodmioty>
             <ns:pParametryWyszukiwania>
-                ${ params.Regon ? `<dat:Regon>${params.Regon}</dat:Regon>` : '' }
-                ${ params.Nip ? `<dat:Nip>${params.Nip}</dat:Nip>` : '' }
-                ${ params.Krs ? `<dat:Krs>${params.Krs}</dat:Krs>` : '' }
-                ${ params.Nipy ? `<dat:Nipy>${params.Nipy.join(',')}</dat:Nipy>` : '' }
-                ${ params.Regony9zn ? `<dat:Regony9zn>${params.Regony9zn.join(',')}</dat:Regony9zn>` : '' }
-                ${ params.Krsy ? `<dat:Krsy>${params.Krsy}</dat:Krsy>` : '' }
-                ${ params.Regony14zn ? `<dat:Regony14zn>${params.Regony14zn}</dat:Regony14zn>` : '' }
+                ${params.REGON ? `<dat:Regon>${params.REGON}</dat:Regon>` : ''}
+                ${params.NIP ? `<dat:Nip>${params.NIP}</dat:Nip>` : ''}
+                ${params.KRS ? `<dat:Krs>${params.KRS}</dat:Krs>` : ''}
+                ${
+                  Array.isArray(params.NIP)
+                    ? `<dat:Nipy>${params.NIP.join(',')}</dat:Nipy>`
+                    : ''
+                }
+                ${
+                  Array.isArray(params.REGON) && regonType === 'size9'
+                    ? `<dat:Regony9zn>${params.REGON.join(',')}</dat:Regony9zn>`
+                    : ''
+                }
+                ${
+                  Array.isArray(params.KRS)
+                    ? `<dat:Krsy>${params.KRS}</dat:Krsy>`
+                    : ''
+                }
+                ${
+                  Array.isArray(params.REGON) && regonType === 'size14'
+                    ? `<dat:Regony14zn>${params.REGON}</dat:Regony14zn>`
+                    : ''
+                }
             </ns:pParametryWyszukiwania>
         </ns:DaneSzukajPodmioty>
     </soap:Body>
 </soap:Envelope>
 `;
+};
